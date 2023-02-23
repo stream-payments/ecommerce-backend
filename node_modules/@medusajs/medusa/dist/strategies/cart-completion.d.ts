@@ -1,0 +1,96 @@
+import { EntityManager } from "typeorm";
+import { IdempotencyKey, Order } from "../models";
+import CartService from "../services/cart";
+import IdempotencyKeyService from "../services/idempotency-key";
+import OrderService from "../services/order";
+import SwapService from "../services/swap";
+import { RequestContext } from "../types/request";
+import { AbstractCartCompletionStrategy, CartCompletionResponse } from "../interfaces";
+import { PaymentProviderService, ProductVariantInventoryService } from "../services";
+declare type InjectedDependencies = {
+    productVariantInventoryService: ProductVariantInventoryService;
+    paymentProviderService: PaymentProviderService;
+    idempotencyKeyService: IdempotencyKeyService;
+    cartService: CartService;
+    orderService: OrderService;
+    swapService: SwapService;
+    manager: EntityManager;
+};
+declare class CartCompletionStrategy extends AbstractCartCompletionStrategy {
+    protected manager_: EntityManager;
+    protected readonly productVariantInventoryService_: ProductVariantInventoryService;
+    protected readonly paymentProviderService_: PaymentProviderService;
+    protected readonly idempotencyKeyService_: IdempotencyKeyService;
+    protected readonly cartService_: CartService;
+    protected readonly orderService_: OrderService;
+    protected readonly swapService_: SwapService;
+    constructor({ productVariantInventoryService, paymentProviderService, idempotencyKeyService, cartService, orderService, swapService, manager, }: InjectedDependencies);
+    complete(id: string, ikey: IdempotencyKey, context: RequestContext): Promise<CartCompletionResponse>;
+    protected handleCreateTaxLines(id: string, { manager }: {
+        manager: EntityManager;
+    }): Promise<{
+        response_code: number;
+        response_body: {
+            code: string;
+            message: string;
+            type: string;
+        };
+        recovery_point?: undefined;
+    } | {
+        recovery_point: string;
+        response_code?: undefined;
+        response_body?: undefined;
+    }>;
+    protected handleTaxLineCreated(id: string, idempotencyKey: IdempotencyKey, { context, manager }: {
+        context: any;
+        manager: EntityManager;
+    }): Promise<{
+        response_code: number;
+        response_body: {
+            code: string;
+            message: string;
+            type: string;
+        };
+        recovery_point?: undefined;
+    } | {
+        response_code: number;
+        response_body: {
+            data: import("../models").Cart;
+            payment_status: string;
+            type: string;
+        };
+        recovery_point?: undefined;
+    } | {
+        recovery_point: string;
+        response_code?: undefined;
+        response_body?: undefined;
+    }>;
+    protected handlePaymentAuthorized(id: string, { manager }: {
+        manager: EntityManager;
+    }): Promise<{
+        response_code: number;
+        response_body: {
+            message: any;
+            type: any;
+            code: any;
+            data?: undefined;
+        };
+    } | {
+        response_code: number;
+        response_body: {
+            data: import("../models").Swap;
+            type: string;
+            message?: undefined;
+            code?: undefined;
+        };
+    } | {
+        response_code: number;
+        response_body: {
+            data: Order;
+            type: string;
+            message?: undefined;
+            code?: undefined;
+        };
+    }>;
+}
+export default CartCompletionStrategy;
