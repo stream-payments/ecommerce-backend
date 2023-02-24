@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://www.medusa-commerce.com">
-    <img alt="Medusa" src="https://i.imgur.com/USubGVY.png" width="100" />
+    <img alt="StreamPay" src="https://i.imgur.com/USubGVY.png" width="100" />
   </a>
 </p>
 <h1 align="center">
-  Medusa Starter Default
+  Marketplace backend
 </h1>
 <p align="center">
 This repo provides the skeleton to get you started with using <a href="https://github.com/stream-payments/ecommerce-platform">Medusa</a>. Follow the steps below to get ready.
